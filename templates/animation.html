@@ -59,6 +59,7 @@
 		recognition.onresult = function(event){
 			console.log(event)
 			document.getElementById('speechToText').value = event.results[0][0].transcript;
+			document.querySelector('input[name="submit"]').click();
 		}
 		recognition.start();
 	 }
@@ -127,6 +128,12 @@
     		document.getElementById("videoPlayer").pause();}
 		}
 
+	window.onload = function() {
+		var videos = document.getElementById("list").getElementsByTagName("li");
+		if (videos.length > 0) {
+			play();
+		}
+	};
 	</script>
 
 
