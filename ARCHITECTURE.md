@@ -1,7 +1,7 @@
 # Architecture Overview
 
 ## 1. High-Level Architecture
-The Audio-Speech-To-Sign-Language-Converter is a web-based application built on the Django framework. The primary goal of the system is to take live audio speech input from a user, process the speech into text using web speech APIs, analyze the text using Natural Language Processing (NLP), and output a sequence of corresponding Indian Sign Language (ISL) animations.
+The Audio-Speech-To-Sign-Language-Converter is a web-based application built on the Django framework. The primary goal of the system is to take live audio speech input from a user, process the speech into text using web speech APIs, analyze the text using Natural Language Processing (NLP), and output a sequence of corresponding American Sign Language (ISL) animations.
 
 ### System Flow
 
