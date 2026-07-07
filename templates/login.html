@@ -1,16 +1,23 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-<div class="form-style">
-	<h1>Log in</h1>
-	<form class="site-form" action="." method="post">
-		{% csrf_token %}
-		{{ form }}
-		{% if request.GET.next %}
-			<input type="hidden" name="next" value="{{ request.GET.next }}">
-		{% endif %}
-		<input class="submit" type="submit" value="Log in">
-	</form>
+<div style="display:flex; align-items:center; justify-content:center; min-height: calc(100vh - 60px); padding: 20px;">
+<div class="glass-card form-wrapper fade-up">
+  <h1>Log in</h1>
+  <p class="subtitle">Welcome back. Sign in to continue.</p>
+
+  <form class="site-form" action="." method="post">
+    {% csrf_token %}
+    {{ form }}
+    {% if request.GET.next %}
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
+    {% endif %}
+    <button class="btn-primary" type="submit">Log In</button>
+  </form>
+
+  <div class="form-footer">
+    Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
+  </div>
+</div>
 </div>
 {% endblock %}

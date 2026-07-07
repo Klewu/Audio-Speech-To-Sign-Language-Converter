@@ -1,146 +1,211 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-<div class="flex-container">
-<div class="flex-item left">
-	<h2 align="center">Enter Text or Use Mic</h2>
-	<br>
-		<form action="" method="post" align="left">
-		{% csrf_token %}
-					<input type="text" name="sen" class="mytext" id="speechToText" placeholder="">
-					<button type="button" name="button" class="mic" onclick="record()"><img src="{% static 'mic3.png' %}" height="32px" width="38px" /></button>
-		  			&nbsp&nbsp&nbsp&nbsp
-		  			<input type="submit" name="submit" class="submit">
+<div class="converter-layout">
 
-		</form>
-		<br>
-		<table cellspacing="20px">
-			<tr>
-				<td class="td">The text that you entered is:</td>
-				<td class="td">{{ text }}</td>
-			</tr>
-			<tr>
-				<td class="td">Key words in sentence:</td>
-				<td class="td">
-				<ul class="td" id="list" align="center">
-  					{% for word in words %}
-    				<li id="{{ i }}" style="margin-right: 8px">{{ word }}</li>
-  					{% endfor %}
-				</ul>
-			</td>
-		</tr>
-	</table></div>
-  <div class="flex-item right">
-  <h2 align="center">Sign Language Animation</h2>
+  <!-- ─── LEFT: INPUT PANEL ─── -->
+  <div class="panel-input">
+    <p class="panel-label">Input</p>
+    <div class="glass-card input-card">
+      <form action="" method="post" id="mainForm">
+        {% csrf_token %}
 
-	<div style="text-align:center">	&nbsp&nbsp
-  	<button class="submit" onclick="playPause()">Play/Pause</button>
-  	<!--  LETS USE ONLY PLAY PAUSE BUTTON WITH 720 *420 ,IT FITS THE SCREEN ASHISH
+        <div class="input-row">
+          <input
+            type="text"
+            name="sen"
+            id="speechToText"
+            class="speech-input"
+            placeholder="Type or speak a sentence…"
+            autocomplete="off"
+            value="{{ text|default:'' }}"
+          >
+          <button type="button" class="mic-btn" id="micBtn" onclick="record()" title="Click to speak">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        </div>
 
-  	<button onclick="makeBig()">Big</button>
-  	<button onclick="makeSmall()">Small</button>
-  	<button onclick="makeNormal()">Normal</button>-->
+        <input type="submit" name="submit" class="hidden-submit" id="hiddenSubmit">
 
+        <button type="submit" class="btn-primary" style="margin-top:0">
+          Translate to Sign Language
+        </button>
+      </form>
 
-  	<video id="videoPlayer" width="600" height="350"  preload="auto" autoplay>
-    	<source src="" type="video/mp4">
-    Your browser does not support HTML5 video.
-  	</video>
-  	</div></div>
+      <!-- Status indicator -->
+      <div id="statusMsg" style="margin-top:14px; font-size:13px; color: var(--text-tertiary); min-height:18px; text-align:center;"></div>
+
+      {% if text %}
+      <div class="text-info">
+        <div class="info-row">
+          <div>
+            <p class="info-label">Original sentence</p>
+            <div class="info-value">{{ text }}</div>
+          </div>
+          {% if words %}
+          <div>
+            <p class="info-label">Sign sequence ({{ words|length }} sign{% if words|length != 1 %}s{% endif %})</p>
+            <div class="word-chips" id="list">
+              {% for word in words %}
+              <span class="chip" id="chip-{{ forloop.counter0 }}">{{ word }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ─── RIGHT: VIDEO PANEL ─── -->
+  <div class="panel-output">
+    <p class="panel-label">Sign Language Output</p>
+    <div class="glass-card output-card">
+      <div class="video-wrapper">
+        {% if not words %}
+        <div class="video-placeholder" id="placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <span>Your sign animation will appear here</span>
+        </div>
+        {% endif %}
+        <video id="videoPlayer" preload="auto" {% if words %}style="display:block"{% else %}style="display:none"{% endif %}>
+          <source src="" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="video-controls">
+        <button class="play-pause-btn" onclick="playPause()" id="playPauseBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Play / Pause
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-
+<!-- ─── SCRIPT ─── -->
 <script>
-	//webkitSpeechRecognition api for speech to text conversion
-	function record(){
-		if (!('webkitSpeechRecognition' in window)) {
-			alert("Your browser does not support the Web Speech API. Please type your text in the input box instead.");
-			return;
-		}
-		var recognition = new webkitSpeechRecognition();
-		recognition.lang='en-IN';
+  var micBtn = document.getElementById('micBtn');
+  var statusMsg = document.getElementById('statusMsg');
 
-		recognition.onresult = function(event){
-			console.log(event)
-			document.getElementById('speechToText').value = event.results[0][0].transcript;
-			document.querySelector('input[name="submit"]').click();
-		}
-		recognition.start();
-	 }
-	function play()
-	{
-		var videoSource = new Array();
-		var	videos = document.getElementById("list").getElementsByTagName("li");
-		var j;
-		for(j=0;j<videos.length;j++)
-		{
-			videoSource[j] = "/static/" + videos[j].innerHTML +".mp4";
-		}
+  function setStatus(msg, color) {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = color || 'var(--text-tertiary)';
+  }
 
-		var i = 0; // define i
-		var videoCount = videoSource.length;
+  function record() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setStatus('⚠ Speech API not supported. Please type instead.', 'var(--danger)');
+      return;
+    }
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
 
-		function videoPlay(videoNum)
-		{
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.color = "#09edc7";
-			document.getElementById("list").getElementsByTagName("li")[videoNum].style.fontSize = "xx-large";
-			document.getElementById("videoPlayer").setAttribute("src", videoSource[videoNum]);
-	    	document.getElementById("videoPlayer").load();
-	    	document.getElementById("videoPlayer").play();
+    micBtn.classList.add('recording');
+    setStatus('🎙 Listening…', 'var(--danger)');
 
-		}
-		document.getElementById('videoPlayer').addEventListener('ended', myHandler, false);
-		document.getElementById("list").getElementsByTagName("li")[0].style.color = "#09edc7";
-		document.getElementById("list").getElementsByTagName("li")[0].style.fontSize = "xx-large";
+    recognition.onresult = function(event) {
+      var transcript = event.results[0][0].transcript;
+      document.getElementById('speechToText').value = transcript;
+      setStatus('✓ Heard: "' + transcript + '"', 'var(--success)');
+      micBtn.classList.remove('recording');
+      setTimeout(function() {
+        document.getElementById('hiddenSubmit').click();
+      }, 400);
+    };
 
-		videoPlay(0); // play the video
+    recognition.onerror = function(e) {
+      micBtn.classList.remove('recording');
+      setStatus('Could not hear you. Try again.', 'var(--warning)');
+    };
 
-		function myHandler()
-		{
-	 		document.getElementById("list").getElementsByTagName("li")[i].style.color = "#feda6a";
-			document.getElementById("list").getElementsByTagName("li")[i].style.fontSize = "20px";
-			i++;
-	    	if (i == videoCount)
-	    	{
-	       	    document.getElementById("videoPlayer").pause();
-	    	}
-	     	else
-	     	{
-	        	videoPlay(i);
-	    	}
-		}
-	}
-	/* LETS USE ONLY PLAY PAUSE BUTTON WITH 720 *420 ,IT FITS THE SCREEN
-	function makeBig() {
-	    document.getElementById("videoPlayer").width = 560;
-		document.getElementById("videoPlayer").height = 360;
-	}
+    recognition.onend = function() {
+      micBtn.classList.remove('recording');
+    };
 
-	function makeSmall() {
-	    document.getElementById("videoPlayer").width = 320;
-		document.getElementById("videoPlayer").height = 180;
-	}
+    recognition.start();
+  }
 
-	function makeNormal() {
-	    document.getElementById("videoPlayer").width = 420;
-		document.getElementById("videoPlayer").height =280;
-	}*/
-	function playPause(){
-  		if (document.getElementById("videoPlayer").paused){
-    		play();}
-  		else{
-    		document.getElementById("videoPlayer").pause();}
-		}
+  // ─── VIDEO PLAYBACK ───
+  var chips = document.querySelectorAll('.chip');
 
-	window.onload = function() {
-		var videos = document.getElementById("list").getElementsByTagName("li");
-		if (videos.length > 0) {
-			play();
-		}
-	};
-	</script>
+  function getVideoSources() {
+    var sources = [];
+    chips.forEach(function(chip) {
+      sources.push('/static/' + chip.textContent.trim() + '.mp4');
+    });
+    return sources;
+  }
 
+  function play() {
+    var videoSources = getVideoSources();
+    if (videoSources.length === 0) return;
 
+    var video = document.getElementById('videoPlayer');
+    var placeholder = document.getElementById('placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+    video.style.display = 'block';
+
+    var i = 0;
+
+    function resetChips() {
+      chips.forEach(function(c) {
+        c.classList.remove('active');
+      });
+    }
+
+    function playVideo(index) {
+      resetChips();
+      if (chips[index]) chips[index].classList.add('active');
+      video.src = videoSources[index];
+      video.load();
+      video.play();
+    }
+
+    video.onended = function() {
+      i++;
+      if (i < videoSources.length) {
+        playVideo(i);
+      } else {
+        resetChips();
+      }
+    };
+
+    playVideo(0);
+  }
+
+  function playPause() {
+    var video = document.getElementById('videoPlayer');
+    if (video.paused) {
+      if (video.src && video.src !== window.location.href) {
+        video.play();
+      } else {
+        play();
+      }
+    } else {
+      video.pause();
+    }
+  }
+
+  // Auto-play on load if words are present
+  window.addEventListener('load', function() {
+    if (chips.length > 0) {
+      play();
+    }
+  });
+</script>
 {% endblock %}

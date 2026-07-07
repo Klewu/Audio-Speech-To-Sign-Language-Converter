@@ -1,13 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
-<video width="500" height="380" class="center" autoplay loop>
-  <source src= "{% static 'Hello.mp4' %}" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-	<div class="form-style" align="middle" >
-	<a href="{% url 'animation' %}"><button class="button">Click to Start</button></a>
-	</div>
+<div class="hero">
+  <div class="hero-badge fade-up">
+    <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+      <circle cx="4" cy="4" r="4" fill="currentColor"/>
+    </svg>
+    Sign Language AI
+  </div>
+
+  <h1 class="fade-up fade-up-1">Speak.<br>We Sign.</h1>
+
+  <p class="fade-up fade-up-2">
+    Convert your voice into beautiful Indian Sign Language animations instantly — powered by AI and natural language processing.
+  </p>
+
+  <a href="{% url 'animation' %}" class="hero-cta fade-up fade-up-3">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+    </svg>
+    Start Converting
+  </a>
+
+  <div class="hero-video fade-up fade-up-4">
+    <video autoplay loop muted playsinline>
+      <source src="{% static 'Hello.mp4' %}" type="video/mp4">
+    </video>
+  </div>
+</div>
 {% endblock %}
