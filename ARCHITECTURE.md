@@ -4,6 +4,24 @@
 The Audio-Speech-To-Sign-Language-Converter is a web-based application built on the Django framework. The primary goal of the system is to take live audio speech input from a user, process the speech into text using web speech APIs, analyze the text using Natural Language Processing (NLP), and output a sequence of corresponding Indian Sign Language (ISL) animations.
 
 ### System Flow
+
+```mermaid
+sequenceDiagram
+    participant User as User (Browser)
+    participant Speech as Web Speech API
+    participant Backend as Django Backend
+    participant NLP as NLTK Processor
+
+    User->>Speech: Speaks into microphone
+    Speech-->>User: Returns Transcript (Text)
+    User->>Backend: POST /animation (Text)
+    Backend->>NLP: Tokenize & POS Tag
+    NLP-->>Backend: Lemmatized Words & Tense
+    Backend->>Backend: Map to .mp4 Video Files
+    Backend-->>User: Render animation.html with Video Sequence
+    User->>User: Auto-plays Sign Language Videos
+```
+
 1. **Input Generation**: The user accesses the web interface and interacts with the application. By utilizing the browser's `webkitSpeechRecognition` API, the user records their speech which is converted directly into text on the client-side.
 2. **Request Handling**: The text data is submitted via a POST request to the Django backend.
 3. **Natural Language Processing (NLP)**: The backend processes the string using NLTK (Natural Language Toolkit). 
