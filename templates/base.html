@@ -61,26 +61,28 @@ li a:hover {
   color: #feda6a;
   font-weight: bold;
 }
-.split {
-  height: 100%;
-  width: 50%;
-  position: fixed;
-  z-index: 1;
-  top: 50;
-  overflow-x: hidden;
-  padding-top: 20px;
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 20px;
+  width: 100%;
+}
 
+.flex-item {
+  width: 48%;
 }
 
 .left {
-  left: 15;
   border-right: 0px #feda6a solid;
 }
 
 .right {
-  right: 0;
   border-left: 1px #feda6a solid;
+  padding-left: 20px;
 }
+
 
 .mytext {
     border:1px solid #393f4d;

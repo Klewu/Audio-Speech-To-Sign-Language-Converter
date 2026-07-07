@@ -3,7 +3,8 @@
 
 
 {% block content %}
-<div class="split left">
+<div class="flex-container">
+<div class="flex-item left">
 	<h2 align="center">Enter Text or Use Mic</h2>
 	<br>
 		<form action="" method="post" align="left">
@@ -31,7 +32,7 @@
 			</td>
 		</tr>
 	</table></div>
-  <div class="split right">
+  <div class="flex-item right">
   <h2 align="center">Sign Language Animation</h2>
 
 	<div style="text-align:center">	&nbsp&nbsp
@@ -48,11 +49,16 @@
     Your browser does not support HTML5 video.
   	</video>
   	</div></div>
+</div>
 
 
 <script>
 	//webkitSpeechRecognition api for speech to text conversion
 	function record(){
+		if (!('webkitSpeechRecognition' in window)) {
+			alert("Your browser does not support the Web Speech API. Please type your text in the input box instead.");
+			return;
+		}
 		var recognition = new webkitSpeechRecognition();
 		recognition.lang='en-IN';
 
